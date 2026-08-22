@@ -23,6 +23,7 @@ public class UserService {
             throw new IllegalArgumentException("Email already registered");
         user.setEmail(request.getEmail());
         user.setName(request.getName());
+        user.setPhone(request.getPhone());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         return userRepository.save(user);
     }

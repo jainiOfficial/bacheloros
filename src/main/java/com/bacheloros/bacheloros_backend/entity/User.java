@@ -24,6 +24,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, unique = true)
+    private String phone;
+
     // constructors, getters, setters below
     public User() {}
 
@@ -34,6 +37,8 @@ public class User implements UserDetails {
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
     // ---- UserDetails contract methods ----
 
