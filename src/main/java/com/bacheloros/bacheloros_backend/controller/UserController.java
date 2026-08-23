@@ -22,7 +22,7 @@ public class UserController {
     public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest request)
     {
         User created = userService.createUser(request);
-        UserResponse response = new UserResponse(created.getId(), created.getEmail(), created.getName());
+        UserResponse response = new UserResponse(created.getId(), created.getEmail(), created.getName(),created.getPhone());
         return ResponseEntity.ok(response);
     }
 
