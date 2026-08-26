@@ -15,6 +15,7 @@ public class BillResponse {
     private boolean isPaid;
     private boolean isRecurring;
     private RecurrenceType recurrenceType;
+    private LocalDate paidOn;
 
     public Long getId() {
         return id;
@@ -86,5 +87,13 @@ public class BillResponse {
 
     public void setRecurrenceType(RecurrenceType recurrenceType) {
         this.recurrenceType = recurrenceType;
+    }
+
+    public LocalDate getPaidOn() {
+        return paidOn;
+    }
+
+    public void setPaidOn(LocalDate paidOn) {
+        this.paidOn = paidOn;
     }
 }

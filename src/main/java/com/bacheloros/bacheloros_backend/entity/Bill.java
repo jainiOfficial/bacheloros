@@ -32,6 +32,9 @@ public class Bill {
     //@JsonProperty("isPaid")dena h kyuki Jackson/java bollean me is prefix hata ke field dhoonta h.
     private boolean isPaid;
 
+    @Column
+    private LocalDate paidOn;
+
     @Column(nullable = false)
     //@JsonProperty("isRecurring")
     private boolean isRecurring;
@@ -123,4 +126,11 @@ public class Bill {
         this.amount = amount;
     }
 
+    public LocalDate getPaidOn() {
+        return paidOn;
+    }
+
+    public void setPaidOn(LocalDate paidOn) {
+        this.paidOn = paidOn;
+    }
 }
