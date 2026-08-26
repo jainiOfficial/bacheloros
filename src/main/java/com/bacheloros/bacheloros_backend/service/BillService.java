@@ -1,14 +1,20 @@
 package com.bacheloros.bacheloros_backend.service;
 
+import com.bacheloros.bacheloros_backend.dto.BillListResponse;
 import com.bacheloros.bacheloros_backend.dto.BillResponse;
 import com.bacheloros.bacheloros_backend.dto.CreateBillRequest;
 import com.bacheloros.bacheloros_backend.entity.Bill;
+import com.bacheloros.bacheloros_backend.entity.BillStatus;
 import com.bacheloros.bacheloros_backend.entity.User;
+import com.bacheloros.bacheloros_backend.exception.ResourceNotFoundException;
 import com.bacheloros.bacheloros_backend.repository.BillRepository;
 import com.bacheloros.bacheloros_backend.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +44,7 @@ public class BillService {
         billResponse.setRecurrenceType(bill.getRecurrenceType());
         billResponse.setRecurring(bill.isRecurring());
         billResponse.setTitle(bill.getTitle());
+        billResponse.setPaidOn(bill.getPaidOn());
         return billResponse;
     }
 
@@ -76,8 +83,68 @@ public class BillService {
         }
 
         bill.setPaid(true);
+        bill.setPaidOn(LocalDate.now());
         billRepository.save(bill);
 
         return toResponse(bill);
     }
+    public BillListResponse getBills(BillStatus status) {
+        User user = getCurrentUser();
+        LocalDate today = LocalDate.now();
+
+        List<Bill> filteredBills;
+        switch (status) {
+            case PAID:
+                filteredBills = billRepository.findByUserAndIsPaidOrderByDueDateDesc(user, true);
+                break;
+            case OVERDUE:
+                filteredBills = billRepository.findByUserAndIsPaidAndDueDateBeforeOrderByDueDateAsc(user, false, today);
+                break;
+            case UPCOMING:
+            default:
+                filteredBills = billRepository.findByUserAndIsPaidAndDueDateGreaterThanEqualOrderByDueDateAsc(user, false, today);
+                break;
+        }
+
+        long upcomingCount = billRepository.countByUserAndIsPaidAndDueDateGreaterThanEqual(user, false, today);
+        long paidCount = billRepository.countByUserAndIsPaid(user, true);
+        long overdueCount = billRepository.countByUserAndIsPaidAndDueDateBefore(user, false, today);
+
+        LocalDate weekEnd = today.plusDays(6);
+        List<Bill> dueThisWeek = billRepository.findByUserAndDueDateBetweenAndIsPaid(user, today, weekEnd, false);
+        BigDecimal dueThisWeekTotal = dueThisWeek.stream()
+                .map(Bill::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BillListResponse response = new BillListResponse();
+        response.setBills(filteredBills.stream().map(this::toResponse).collect(Collectors.toList()));
+        response.setUpcomingCount(upcomingCount);
+        response.setPaidCount(paidCount);
+        response.setOverdueCount(overdueCount);
+        return response;
+    }
+    public BillResponse getBillById(Long id)
+    {
+        User currentUser = getCurrentUser();
+        Bill bill = billRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Bill not found"));
+
+        if (!bill.getUser().getId().equals(currentUser.getId())) {
+            throw new ResourceNotFoundException("Bill not found"); // ownership check
+        }
+        return toResponse(bill);
+    }
+    public void deleteBillById(Long id)
+    {
+        User currentUser = getCurrentUser();
+        Bill bill = billRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Bill not found"));
+
+        if (!bill.getUser().getId().equals(currentUser.getId())) {
+            throw new ResourceNotFoundException("Bill not found"); // ownership check
+        }
+        billRepository.delete(bill);
+    }
+
+
 }

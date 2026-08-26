@@ -22,4 +22,8 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT) // 409
                 .body(Map.of("error", ex.getMessage()));
     }
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<String> handleNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
 }
