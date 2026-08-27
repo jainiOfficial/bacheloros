@@ -24,6 +24,10 @@ public class Expense {
     private String paymentType;
     @Column(nullable = false)
     private String paymentTo;
+    @Column
+    private String customCategory;
+    @Column(nullable = false)
+    private boolean fromBill;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -98,5 +102,21 @@ public class Expense {
 
     public void setPaymentTo(String paymentTo) {
         this.paymentTo = paymentTo;
+    }
+
+    public String getCustomCategory() {
+        return customCategory;
+    }
+
+    public void setCustomCategory(String customCategory) {
+        this.customCategory = customCategory;
+    }
+
+    public boolean isFromBill() {
+        return fromBill;
+    }
+
+    public void setFromBill(boolean fromBill) {
+        this.fromBill = fromBill;
     }
 }

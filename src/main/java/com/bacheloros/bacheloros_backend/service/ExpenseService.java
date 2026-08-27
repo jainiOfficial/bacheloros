@@ -33,6 +33,8 @@ public class ExpenseService {
         expenseResponse.setPaymentTo(expense.getPaymentTo());
         expenseResponse.setPaymentType(expense.getPaymentType());
         expenseResponse.setTitle(expense.getTitle());
+        expenseResponse.setCustomCategory(expense.getCustomCategory());
+        expenseResponse.setFromBill(expense.isFromBill());
         return expenseResponse;
     }
     private User getCurrentUser() {
@@ -50,6 +52,8 @@ public class ExpenseService {
         expense.setDate(expenseRequest.getDate());
         expense.setPaymentType(expenseRequest.getPaymentType());
         expense.setPaymentTo(expenseRequest.getPaymentTo());
+        expense.setCustomCategory(expenseRequest.getCustomCategory());
+        expense.setFromBill(expenseRequest.isFromBill());
         expense.setUser(user);
         return toResponse(expenseRepository.save(expense));
     }
@@ -77,6 +81,8 @@ public class ExpenseService {
             expense.setDate(expenseRequest.getDate());
             expense.setPaymentType(expenseRequest.getPaymentType());
             expense.setPaymentTo(expenseRequest.getPaymentTo());
+            expense.setCustomCategory(expenseRequest.getCustomCategory());
+            expense.setFromBill(expenseRequest.isFromBill());
             return toResponse(expenseRepository.save(expense));
 
         }

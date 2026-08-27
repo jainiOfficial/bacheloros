@@ -12,6 +12,8 @@ public class CreateExpenseRequest {
     private LocalDate date;
     private String paymentType;
     private String paymentTo;
+    private String customCategory;
+    private boolean fromBill;
 
     public String getTitle() {
         return title;
@@ -69,4 +71,19 @@ public class CreateExpenseRequest {
         this.paymentTo = paymentTo;
     }
 
+    public String getCustomCategory() {
+        return customCategory;
+    }
+
+    public void setCustomCategory(String customCategory) {
+        this.customCategory = customCategory;
+    }
+
+    public boolean isFromBill() {
+        return fromBill;
+    }
+
+    public void setFromBill(boolean fromBill) {
+        this.fromBill = fromBill;
+    }
 }
