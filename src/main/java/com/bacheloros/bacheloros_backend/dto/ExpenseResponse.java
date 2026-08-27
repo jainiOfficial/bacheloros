@@ -13,6 +13,8 @@ public class ExpenseResponse {
     private LocalDate date;
     private String paymentType;
     private String paymentTo;
+    private String customCategory;
+    private boolean fromBill;
 
     public Long getId() {
         return id;
@@ -76,5 +78,21 @@ public class ExpenseResponse {
 
     public void setPaymentTo(String paymentTo) {
         this.paymentTo = paymentTo;
+    }
+
+    public String getCustomCategory() {
+        return customCategory;
+    }
+
+    public void setCustomCategory(String customCategory) {
+        this.customCategory = customCategory;
+    }
+
+    public boolean isFromBill() {
+        return fromBill;
+    }
+
+    public void setFromBill(boolean fromBill) {
+        this.fromBill = fromBill;
     }
 }
