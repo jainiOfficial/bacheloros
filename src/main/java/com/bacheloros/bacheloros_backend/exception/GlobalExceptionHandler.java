@@ -26,4 +26,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleNotFound(ResourceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
+
+    @ExceptionHandler(InvalidBudgetMonthException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidBudgetMonth(InvalidBudgetMonthException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST) // 400
+                .body(Map.of("error", ex.getMessage()));
+    }
 }

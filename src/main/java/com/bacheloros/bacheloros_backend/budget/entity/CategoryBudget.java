@@ -1,18 +1,18 @@
-package com.bacheloros.bacheloros_backend.entity;
+package com.bacheloros.bacheloros_backend.budget.entity;
 
-
+import com.bacheloros.bacheloros_backend.entity.User;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(
-        name = "budgets",
+        name = "category_budgets",
         uniqueConstraints = @UniqueConstraint(
                 columnNames = {"user_id", "category", "month", "year"}
         )
 )
-public class Budget {
+public class CategoryBudget {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +22,7 @@ public class Budget {
     private String category;
 
     @Column(nullable = false)
-    private BigDecimal limitAmount;
+    private BigDecimal allocatedAmount;
 
     @Column(nullable = false)
     private Integer month;   // 1-12
@@ -50,12 +50,12 @@ public class Budget {
         this.category = category;
     }
 
-    public BigDecimal getLimitAmount() {
-        return limitAmount;
+    public Integer getYear() {
+        return year;
     }
 
-    public void setLimitAmount(BigDecimal limitAmount) {
-        this.limitAmount = limitAmount;
+    public void setYear(Integer year) {
+        this.year = year;
     }
 
     public Integer getMonth() {
@@ -66,19 +66,19 @@ public class Budget {
         this.month = month;
     }
 
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
     public User getUser() {
         return user;
     }
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public BigDecimal getAllocatedAmount() {
+        return allocatedAmount;
+    }
+
+    public void setAllocatedAmount(BigDecimal allocatedAmount) {
+        this.allocatedAmount = allocatedAmount;
     }
 }

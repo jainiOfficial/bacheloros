@@ -2,11 +2,9 @@ package com.bacheloros.bacheloros_backend.service;
 
 import com.bacheloros.bacheloros_backend.dto.FinanceOverviewResponse;
 import com.bacheloros.bacheloros_backend.entity.Bill;
-import com.bacheloros.bacheloros_backend.entity.Budget;
 import com.bacheloros.bacheloros_backend.entity.PeriodType;
 import com.bacheloros.bacheloros_backend.entity.User;
 import com.bacheloros.bacheloros_backend.repository.BillRepository;
-import com.bacheloros.bacheloros_backend.repository.BudgetRepository;
 import com.bacheloros.bacheloros_backend.repository.ExpenseRepository;
 import com.bacheloros.bacheloros_backend.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,13 +18,11 @@ import java.util.List;
 @Service
 public class FinanceService {
     private final ExpenseRepository expenseRepository;
-    private final BudgetRepository budgetRepository;
     private final UserRepository userRepository;
     private final BillRepository billRepository;
 
-    public FinanceService(ExpenseRepository expenseRepository, BudgetRepository budgetRepository, UserRepository userRepository, BillRepository billRepository) {
+    public FinanceService(ExpenseRepository expenseRepository, UserRepository userRepository, BillRepository billRepository) {
         this.expenseRepository = expenseRepository;
-        this.budgetRepository = budgetRepository;
         this.userRepository = userRepository;
         this.billRepository = billRepository;
     }
@@ -86,12 +82,7 @@ public class FinanceService {
         // 2. Budget remaining - hamesha CURRENT MONTH ka (period-filter se independent)
         LocalDate monthStart = today.withDayOfMonth(1);
         LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
-        List<Budget> monthBudgets = budgetRepository.findByUserAndMonthAndYear(user, today.getMonthValue(), today.getYear());
-        BigDecimal totalBudgeted = monthBudgets.stream()
-                .map(Budget::getLimitAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal monthSpent = expenseRepository.getTotalSpentByDateRange(user, monthStart, monthEnd);
-        BigDecimal budgetRemaining = totalBudgeted.subtract(monthSpent);
 
         // 3. Bills pending (period-independent — total unpaid count)
         long billsPendingCount = billRepository.countByUserAndIsPaid(user, false);
@@ -104,7 +95,6 @@ public class FinanceService {
 
         FinanceOverviewResponse response = new FinanceOverviewResponse();
         response.setBillsPendingCount(billsPendingCount);
-        response.setBudgetRemaining(budgetRemaining);
         response.setPeriodExpense(periodExpense);
         response.setPercentChangeVsLastPeriod(percentChange);
         response.setOverdueBillsAmount(overdueAmount);
