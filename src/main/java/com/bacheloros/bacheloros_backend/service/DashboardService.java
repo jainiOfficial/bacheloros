@@ -1,13 +1,10 @@
 package com.bacheloros.bacheloros_backend.service;
 
 import com.bacheloros.bacheloros_backend.dto.BillResponse;
-import com.bacheloros.bacheloros_backend.dto.CategorySummary;
 import com.bacheloros.bacheloros_backend.dto.DashboardResponse;
 import com.bacheloros.bacheloros_backend.entity.Bill;
-import com.bacheloros.bacheloros_backend.entity.Budget;
 import com.bacheloros.bacheloros_backend.entity.User;
 import com.bacheloros.bacheloros_backend.repository.BillRepository;
-import com.bacheloros.bacheloros_backend.repository.BudgetRepository;
 import com.bacheloros.bacheloros_backend.repository.ExpenseRepository;
 import com.bacheloros.bacheloros_backend.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,13 +18,11 @@ import java.util.stream.Collectors;
 @Service
 public class DashboardService {
     private final ExpenseRepository expenseRepository;
-    private final BudgetRepository budgetRepository;
     private final UserRepository userRepository;
     private final BillRepository billRepository;
 
-    public DashboardService(ExpenseRepository expenseRepository, BudgetRepository budgetRepository, UserRepository userRepository, BillRepository billRepository) {
+    public DashboardService(ExpenseRepository expenseRepository, UserRepository userRepository, BillRepository billRepository) {
         this.expenseRepository = expenseRepository;
-        this.budgetRepository = budgetRepository;
         this.userRepository = userRepository;
         this.billRepository = billRepository;
     }
@@ -59,24 +54,6 @@ public class DashboardService {
 
         BigDecimal totalSpent = expenseRepository.getTotalSpentByDateRange(user, startDate, endDate);
 
-        List<Budget> budgets = budgetRepository.findByUserAndMonthAndYear(user, month, year);
-        BigDecimal totalBudgeted = budgets.stream()
-                .map(Budget::getLimitAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal remaining = totalBudgeted.subtract(totalSpent);
-        List<CategorySummary> categoryBreakdown = budgets.stream()
-                .map(budget -> {
-                    BigDecimal categorySpent = expenseRepository.getTotalSpentByCategoryAndDateRange(
-                            user, budget.getCategory(), startDate, endDate);
-
-                    CategorySummary summary = new CategorySummary();
-                    summary.setCategory(budget.getCategory());
-                    summary.setBudget(budget.getLimitAmount());
-                    summary.setTotalSpent(categorySpent);
-                    return summary;
-                })
-                .collect(Collectors.toList());
         //Dashboard pe show ho ki konse Unpaid bills h month me.
         List<Bill> unpaidBills = billRepository.findByUserAndDueDateBetweenAndIsPaid(
                 user, startDate, endDate, false);
@@ -87,9 +64,8 @@ public class DashboardService {
 
         DashboardResponse response = new DashboardResponse();
         response.setTotalSpent(totalSpent);
-        response.setTotalBudgeted(totalBudgeted);
-        response.setRemaining(remaining);
-        response.setCategoryBreakdown(categoryBreakdown);
+        response.setTotalBudgeted(BigDecimal.valueOf(0));
+        response.setRemaining(BigDecimal.valueOf(0));
         response.setUpcomingBills(upcomingBills);
         //returning response
         return response;
