@@ -39,4 +39,12 @@ public class ExpenseController {
         expenseService.deleteExpense(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/by-category")
+    public ResponseEntity<List<ExpenseResponse>> getExpensesByCategoryAndMonth(
+            @RequestParam String category,
+            @RequestParam Integer month,
+            @RequestParam Integer year) {
+        return ResponseEntity.ok(expenseService.getExpensesByCategoryAndMonth(category, month, year));
+    }
 }

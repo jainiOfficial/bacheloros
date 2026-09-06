@@ -9,6 +9,7 @@ import com.bacheloros.bacheloros_backend.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -104,5 +105,18 @@ public class ExpenseService {
         else {
             throw new RuntimeException("Un-authorize");
         }
+    }
+
+    public List<ExpenseResponse> getExpensesByCategoryAndMonth(String category, Integer month, Integer year) {
+        User user = getCurrentUser();
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        List<Expense> expenseList = expenseRepository
+                .findByUserAndCategoryAndDateBetweenOrderByDateDesc(user, category, startDate, endDate);
+
+        return expenseList.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 }
