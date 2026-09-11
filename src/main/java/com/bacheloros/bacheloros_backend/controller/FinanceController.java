@@ -19,8 +19,7 @@ public class FinanceController {
     }
 
     @GetMapping("/overview")
-    public ResponseEntity<FinanceOverviewResponse> getOverview(
-            @RequestParam(defaultValue = "MONTH") PeriodType period) {
-        return ResponseEntity.ok(financeService.getOverview(period));
+    public ResponseEntity<FinanceOverviewResponse> getOverview() {
+        return ResponseEntity.ok(financeService.getOverview());
     }
 }

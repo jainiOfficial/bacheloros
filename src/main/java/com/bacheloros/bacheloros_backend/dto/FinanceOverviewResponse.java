@@ -5,10 +5,11 @@ import java.math.BigDecimal;
 public class FinanceOverviewResponse {
     private long billsPendingCount;
     private BigDecimal budgetRemaining;
-    private BigDecimal periodExpense;
+    private BigDecimal monthExpense;
     private Double percentChangeVsLastPeriod; // null jab pichle period mein 0 expense tha (divide-by-zero avoid)
     private BigDecimal overdueBillsAmount;
     private long overdueBillsCount;
+    private BigDecimal totalBudgetAmount;
 
     public long getBillsPendingCount() {
         return billsPendingCount;
@@ -34,12 +35,12 @@ public class FinanceOverviewResponse {
         this.percentChangeVsLastPeriod = percentChangeVsLastPeriod;
     }
 
-    public BigDecimal getPeriodExpense() {
-        return periodExpense;
+    public BigDecimal getMonthExpense() {
+        return monthExpense;
     }
 
-    public void setPeriodExpense(BigDecimal periodExpense) {
-        this.periodExpense = periodExpense;
+    public void setMonthExpense(BigDecimal periodExpense) {
+        this.monthExpense = periodExpense;
     }
 
     public BigDecimal getOverdueBillsAmount() {
@@ -56,5 +57,13 @@ public class FinanceOverviewResponse {
 
     public void setOverdueBillsCount(long overdueBillsCount) {
         this.overdueBillsCount = overdueBillsCount;
+    }
+
+    public BigDecimal getTotalBudgetAmount() {
+        return totalBudgetAmount;
+    }
+
+    public void setTotalBudgetAmount(BigDecimal totalBudgetAmount) {
+        this.totalBudgetAmount = totalBudgetAmount;
     }
 }
