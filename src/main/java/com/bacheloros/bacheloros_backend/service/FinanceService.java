@@ -1,5 +1,7 @@
 package com.bacheloros.bacheloros_backend.service;
 
+import com.bacheloros.bacheloros_backend.budget.entity.MonthlyBudget;
+import com.bacheloros.bacheloros_backend.budget.repository.MonthlyBudgetRepository;
 import com.bacheloros.bacheloros_backend.dto.FinanceOverviewResponse;
 import com.bacheloros.bacheloros_backend.entity.Bill;
 import com.bacheloros.bacheloros_backend.entity.PeriodType;
@@ -20,11 +22,13 @@ public class FinanceService {
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
     private final BillRepository billRepository;
+    private final MonthlyBudgetRepository monthlyBudgetRepository;
 
-    public FinanceService(ExpenseRepository expenseRepository, UserRepository userRepository, BillRepository billRepository) {
+    public FinanceService(ExpenseRepository expenseRepository, UserRepository userRepository, BillRepository billRepository,MonthlyBudgetRepository monthlyBudgetRepository) {
         this.expenseRepository = expenseRepository;
         this.userRepository = userRepository;
         this.billRepository = billRepository;
+        this.monthlyBudgetRepository=monthlyBudgetRepository;
     }
 
     private User getCurrentUser() {
@@ -60,31 +64,9 @@ public class FinanceService {
         }
     }
 
-    public FinanceOverviewResponse getOverview(PeriodType period) {
+    public FinanceOverviewResponse getOverview() {
         User user = getCurrentUser();
         LocalDate today = LocalDate.now();
-
-        LocalDate[] currentRange = resolveCurrentRange(period, today);
-        LocalDate[] previousRange = resolvePreviousRange(period, currentRange);
-
-        // 1. Period expense + % change
-        BigDecimal periodExpense = expenseRepository.getTotalSpentByDateRange(user, currentRange[0], currentRange[1]);
-        BigDecimal previousExpense = expenseRepository.getTotalSpentByDateRange(user, previousRange[0], previousRange[1]);
-
-        Double percentChange = null;
-        if (previousExpense.compareTo(BigDecimal.ZERO) != 0) {
-            BigDecimal diff = periodExpense.subtract(previousExpense);
-            percentChange = diff.divide(previousExpense, 4, java.math.RoundingMode.HALF_UP)
-                    .multiply(BigDecimal.valueOf(100))
-                    .doubleValue();
-        }
-
-        // 2. Budget remaining - hamesha CURRENT MONTH ka (period-filter se independent)
-        LocalDate monthStart = today.withDayOfMonth(1);
-        LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
-        BigDecimal monthSpent = expenseRepository.getTotalSpentByDateRange(user, monthStart, monthEnd);
-
-        // 3. Bills pending (period-independent — total unpaid count)
         long billsPendingCount = billRepository.countByUserAndIsPaid(user, false);
 
         // 4. Overdue bills
@@ -93,12 +75,24 @@ public class FinanceService {
                 .map(Bill::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        // 2. Budget remaining - hamesha CURRENT MONTH ka (period-filter se independent)
+        LocalDate monthStart = today.withDayOfMonth(1);
+        LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
+        BigDecimal monthExpense = expenseRepository.getTotalSpentByDateRange(user, monthStart, monthEnd);
+
+        BigDecimal totalBudgetAmount = monthlyBudgetRepository
+                .findByUserAndMonthAndYear(user, today.getMonthValue(), today.getYear())
+                .map(MonthlyBudget::getTotalAmount)
+                .orElse(BigDecimal.ZERO);
+        BigDecimal budgetRemaining = totalBudgetAmount.subtract(monthExpense);
+
         FinanceOverviewResponse response = new FinanceOverviewResponse();
         response.setBillsPendingCount(billsPendingCount);
-        response.setPeriodExpense(periodExpense);
-        response.setPercentChangeVsLastPeriod(percentChange);
         response.setOverdueBillsAmount(overdueAmount);
         response.setOverdueBillsCount(overdueBills.size());
+        response.setTotalBudgetAmount(totalBudgetAmount);
+        response.setBudgetRemaining(budgetRemaining);
+        response.setMonthExpense(monthExpense);
         return response;
     }
 }
