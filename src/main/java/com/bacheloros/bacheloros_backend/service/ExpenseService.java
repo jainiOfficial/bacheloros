@@ -119,4 +119,17 @@ public class ExpenseService {
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
+
+    public List<ExpenseResponse> getExpensesByMonth(Integer month, Integer year) {
+        User user = getCurrentUser();
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        List<Expense> expenseList = expenseRepository
+                .findByUserAndDateBetween(user, startDate, endDate);
+
+        return expenseList.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
 }
